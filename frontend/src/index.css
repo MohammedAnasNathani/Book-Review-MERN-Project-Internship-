@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Elegant Bookish Theme (Light) */
+    --background: 40 33% 98%; /* #FDF8F3 (Cream) */
+    --foreground: 24 33% 10%; /* #221914 (Dark Brown text) */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 24 33% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 33% 10%;
+    --primary: 28 67% 48%; /* #C17835 (Warm Terra Cotta/Leather) */
+    --primary-foreground: 40 33% 98%;
+    --secondary: 40 20% 94%; /* Light Beige */
+    --secondary-foreground: 24 33% 10%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 25 15% 45%; /* Softer brown/grey */
+    --accent: 35 50% 90%; /* #F5E6D3 (Highlight/Parchment) */
+    --accent-foreground: 28 67% 48%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 35 20% 90%; /* #EBE3DA */
+    --input: 35 20% 90%;
+    --ring: 28 67% 48%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Elegant Night Reading Theme */
+    --background: 24 25% 12%; /* #1A1410 (Deep Brown/Black) */
+    --foreground: 40 20% 94%; /* #EFE8E1 (Off-white text) */
+    --card: 24 20% 16%; /* #261F1A */
+    --card-foreground: 40 20% 94%;
+    --popover: 24 20% 16%;
+    --popover-foreground: 40 20% 94%;
+    --primary: 30 60% 60%; /* #D4A574 (Muted Gold/Bronze) */
+    --primary-foreground: 24 25% 12%;
+    --secondary: 24 15% 25%;
+    --secondary-foreground: 40 20% 94%;
+    --muted: 24 15% 25%;
+    --muted-foreground: 30 10% 65%;
+    --accent: 24 15% 25%;
+    --accent-foreground: 30 60% 60%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 24 15% 25%;
+    --input: 24 15% 25%;
+    --ring: 30 60% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

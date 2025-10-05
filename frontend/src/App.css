@@ -1,0 +1,685 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ============ LAYOUT ============ */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Merriweather', serif;
+}
+
+/* ============ NAVBAR ============ */
+.navbar {
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Merriweather', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  text-decoration: none;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.theme-toggle {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: hsl(var(--accent));
+}
+
+.add-book-btn {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* ============ HOME PAGE ============ */
+.hero-section {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary) / 0.1) 100%);
+    padding: 4rem 0;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .dark .hero-section {
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--primary) / 0.05) 100%);
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+.filters-section {
+  margin-bottom: 2rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+}
+
+.search-input {
+  padding-left: 3rem !important;
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.page-info {
+  font-weight: 500;
+}
+
+/* ============ BOOK CARD ============ */
+.book-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-color: hsl(var(--primary));
+}
+
+.book-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.book-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+.book-genre {
+  padding: 0.25rem 0.75rem;
+  background: hsl(var(--accent));
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.book-author {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.book-description {
+  color: hsl(var(--foreground));
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.book-card-footer {
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 1rem;
+  margin-top: auto;
+}
+
+.book-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.book-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+}
+
+/* ============ AUTH PAGES ============ */
+.auth-page {
+  min-height: calc(100vh - 80px); /* Adjust for navbar height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(circle, hsl(var(--accent)) 0%, hsl(var(--background)) 70%);
+}
+  
+.dark .auth-page {
+  background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, hsl(var(--background)) 70%);
+}
+  
+.auth-container {
+  width: 100%;
+  max-width: 450px;
+  background: hsl(var(--card));
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid hsl(var(--border));
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-logo {
+  display: inline-flex;
+  padding: 1rem;
+  background: hsl(var(--accent));
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  color: hsl(var(--primary));
+}
+
+.auth-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-submit {
+  margin-top: 1rem;
+  padding: 1rem !important;
+  font-size: 1rem !important;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-footer a {
+  color: hsl(var(--primary));
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ============ BOOK DETAILS PAGE ============ */
+.book-details-header {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+.book-meta-top {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.book-genre-badge, .book-year-badge {
+  padding: 0.35rem 0.85rem;
+  background: hsl(var(--accent));
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.book-details-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-details-author {
+  font-size: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+.book-rating-info {
+  margin-bottom: 1.5rem;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.rating-count {
+  color: hsl(var(--muted-foreground));
+}
+
+.book-details-description {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.book-added-by {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+.book-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.rating-chart-section {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.rating-chart-section h2 {
+  margin-bottom: 1.5rem;
+}
+
+/* ============ REVIEW FORM ============ */
+.review-form-section {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.review-form-section h2 {
+  margin-bottom: 1.5rem;
+}
+
+.star-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ============ REVIEWS SECTION ============ */
+.reviews-section {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 3rem;
+}
+
+.reviews-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 2rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.review-card {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.review-author {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  padding: 0.5rem;
+  background: none;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  cursor: pointer;
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: hsl(var(--accent));
+}
+
+.review-text {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.review-date {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ============ ADD/EDIT BOOK PAGE ============ */
+.form-page-header {
+  text-align: center;
+  margin: 3rem 0 2rem;
+}
+
+.form-page-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-page-header p {
+  color: hsl(var(--muted-foreground));
+  font-size: 1.1rem;
+}
+
+.book-form {
+  max-width: 700px;
+  margin: 0 auto;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ============ PROFILE PAGE ============ */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 2.5rem;
+  margin: 2rem 0;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: 'Merriweather', serif;
+}
+
+.profile-info h1 {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.profile-info p {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1rem;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.profile-tabs {
+  margin-bottom: 3rem;
+}
+
+.profile-review-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.profile-review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: hsl(var(--primary));
+}
+
+.review-book-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.review-book-info p {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.75rem;
+}
+
+/* ============ EMPTY STATE & LOADING ============ */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.empty-state svg {
+  margin: 0 auto 1rem;
+  opacity: 0.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: hsl(var(--primary));
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .search-form {
+    flex-direction: column;
+  }
+  
+  .books-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .book-details-title {
+    font-size: 2rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-actions .btn-text {
+    display: none;
+  }
+}
