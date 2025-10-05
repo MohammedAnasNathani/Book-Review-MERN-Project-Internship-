@@ -3,40 +3,37 @@ const Book = require('../models/Book');
 const Review = require('../models/Review');
 const User = require('../models/User');
 
-// Helper to format book data consistently for the frontend
+// Centralized helper to ensure data format is ALWAYS consistent
 const formatBookData = async (book) => {
     const bookObject = book.toObject();
     
-    // Calculate stats
     const reviews = await Review.find({ bookId: bookObject._id });
     const review_count = reviews.length;
     const average_rating = review_count > 0
         ? reviews.reduce((sum, review) => sum + review.rating, 0) / review_count
         : 0;
 
-    // Get adder's name
     const addedByUser = await User.findById(bookObject.addedBy);
 
-    // Assemble the final object in the format the frontend expects
     return {
-        id: bookObject._id,
+        id: bookObject._id.toString(),
         title: bookObject.title,
         author: bookObject.author,
         description: bookObject.description,
         genre: bookObject.genre,
         year: bookObject.publishedYear,
-        added_by: bookObject.addedBy,
+        added_by: bookObject.addedBy.toString(),
         added_by_name: addedByUser ? addedByUser.name : 'Unknown',
         created_at: bookObject.createdAt,
-        average_rating: average_rating, // FIX: Use snake_case
-        review_count: review_count,       // FIX: Use snake_case
+        average_rating: average_rating,
+        review_count: review_count,
     };
 };
 
 exports.getBooks = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.per_page) || 6;
+        const limit = 5; // SET TO 5 AS PER REQUIREMENT
         const skip = (page - 1) * limit;
 
         let query = {};
@@ -50,7 +47,7 @@ exports.getBooks = async (req, res) => {
             query.genre = req.query.genre;
         }
 
-        let sortOptions = { createdAt: -1 }; // Default to 'latest'
+        let sortOptions = { createdAt: -1 };
         if (req.query.sort_by === 'year_desc') sortOptions = { publishedYear: -1 };
         if (req.query.sort_by === 'year_asc') sortOptions = { publishedYear: 1 };
 
@@ -59,11 +56,10 @@ exports.getBooks = async (req, res) => {
 
         let formattedBooks = await Promise.all(books.map(book => formatBookData(book)));
 
-        // Manual sort for rating after calculation
         if (req.query.sort_by === 'rating_desc') {
             formattedBooks.sort((a, b) => b.average_rating - a.average_rating);
         }
-
+        
         res.json({
             books: formattedBooks,
             total: totalBooks,
