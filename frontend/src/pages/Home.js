@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
-import { Search, BookOpen } from 'lucide-react'; // ADDED BookOpen HERE
+import { Search, BookOpen } from 'lucide-react';
 import BookCard from '../components/BookCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ const Home = () => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
-        per_page: '6',
+        per_page: '5', // <--- THIS IS THE FIX. CHANGED FROM '6' to '5'.
       });
       if (search) params.append('search', search);
       if (genre) params.append('genre', genre);
@@ -58,7 +58,6 @@ const Home = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
-    // The useEffect hook for fetchBooks will automatically run because 'search' state changes
   };
 
   return (
@@ -137,7 +136,7 @@ const Home = () => {
           <>
             <div className="books-grid" data-testid="books-grid">
               {books.map((book) => (
-                <BookCard key={book._id} book={book} />
+                <BookCard key={book.id} book={book} />
               ))}
             </div>
             {totalPages > 1 && (
