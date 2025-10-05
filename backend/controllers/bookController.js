@@ -1,198 +1,154 @@
 // backend/controllers/bookController.js
 const Book = require('../models/Book');
 const Review = require('../models/Review');
+const User = require('../models/User');
 
-// @desc    Get all books with pagination, search, filter, and sort
-// @route   GET /api/books
-exports.getBooks = async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.per_page) || 5; // Use per_page to match new frontend
-  const skip = (page - 1) * limit;
-
-  const search = req.query.search || '';
-  const genre = req.query.genre || '';
-  const sortBy = req.query.sort_by || 'latest';
-
-  try {
-    // Build Query
-    let query = {};
+// Helper to format book data consistently for the frontend
+const formatBookData = async (book) => {
+    const bookObject = book.toObject();
     
-    // Search (Title or Author)
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { author: { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    // Filter by Genre
-    if (genre && genre !== 'all') {
-      query.genre = genre;
-    }
-
-    // Determine Sorting
-    let sortOptions = {};
-    switch (sortBy) {
-        case 'year_desc': sortOptions = { publishedYear: -1 }; break;
-        case 'year_asc': sortOptions = { publishedYear: 1 }; break;
-        case 'rating_desc': sortOptions = { averageRating: -1 }; break; // We need to calculate this
-        default: sortOptions = { createdAt: -1 }; // 'latest'
-    }
-
-    // If sorting by rating, we need a more complex aggregation, 
-    // for now, let's stick to basic sorts to keep it stable, or calculate on fly.
-    // Simplified approach for MERN assignment:
-    
-    let booksQuery = Book.find(query)
-        .populate('addedBy', 'name')
-        .sort(sortOptions);
-
-    // Execute query with pagination
-    const books = await booksQuery.skip(skip).limit(limit).lean();
-
-    // Calculate ratings for these books (needed for display & sorting)
-    for (let book of books) {
-        const reviews = await Review.find({ bookId: book._id });
-        book.reviewCount = reviews.length;
-        book.averageRating = reviews.length > 0 
-            ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)
-            : 0;
-        // Map _id to id for frontend consistency
-        book.id = book._id; 
-        book.added_by_name = book.addedBy.name;
-        book.year = book.publishedYear; // map for frontend
-    }
-
-    // Manual sort if rating_desc was requested (since it's calculated)
-    if (sortBy === 'rating_desc') {
-        books.sort((a, b) => b.averageRating - a.averageRating);
-    }
-
-    const totalBooks = await Book.countDocuments(query);
-
-    res.json({
-        books,
-        total: totalBooks,
-        page,
-        per_page: limit,
-        total_pages: Math.ceil(totalBooks / limit)
-    });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// @desc    Get a single book by ID
-// @route   GET /api/books/:id
-exports.getBookById = async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id).populate('addedBy', 'name').lean();
-    if (!book) {
-      return res.status(404).json({ msg: 'Book not found' });
-    }
-
-    // Get stats
-    const reviews = await Review.find({ bookId: book._id });
-    book.reviewCount = reviews.length;
-    book.averageRating = reviews.length > 0 
-        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)
+    // Calculate stats
+    const reviews = await Review.find({ bookId: bookObject._id });
+    const review_count = reviews.length;
+    const average_rating = review_count > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / review_count
         : 0;
-    
-    // Format for frontend
-    book.id = book._id;
-    book.added_by = book.addedBy._id;
-    book.added_by_name = book.addedBy.name;
-    book.year = book.publishedYear;
 
-    res.json(book);
-  } catch (err) {
-    console.error(err.message);
-    if(err.kind === 'ObjectId') return res.status(404).json({ msg: 'Book not found' });
-    res.status(500).send('Server Error');
-  }
+    // Get adder's name
+    const addedByUser = await User.findById(bookObject.addedBy);
+
+    // Assemble the final object in the format the frontend expects
+    return {
+        id: bookObject._id,
+        title: bookObject.title,
+        author: bookObject.author,
+        description: bookObject.description,
+        genre: bookObject.genre,
+        year: bookObject.publishedYear,
+        added_by: bookObject.addedBy,
+        added_by_name: addedByUser ? addedByUser.name : 'Unknown',
+        created_at: bookObject.createdAt,
+        average_rating: average_rating, // FIX: Use snake_case
+        review_count: review_count,       // FIX: Use snake_case
+    };
 };
 
-// @desc    Add a new book
-// @route   POST /api/books
-exports.addBook = async (req, res) => {
-  const { title, author, description, genre, year } = req.body; // frontend sends 'year'
-  
-  try {
-    const newBook = new Book({
-      title,
-      author,
-      description,
-      genre,
-      publishedYear: year, // map to schema
-      addedBy: req.user.id,
-    });
-    const book = await newBook.save();
-    //Return formatted
-    const populated = await Book.findById(book._id).populate('addedBy', 'name').lean();
-    populated.id = populated._id;
-    res.json(populated);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// @desc    Update a book
-// @route   PUT /api/books/:id
-exports.updateBook = async (req, res) => {
-    const { title, author, description, genre, year } = req.body;
-
+exports.getBooks = async (req, res) => {
     try {
-        let book = await Book.findById(req.params.id);
-        if (!book) return res.status(404).json({ msg: 'Book not found' });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.per_page) || 6;
+        const skip = (page - 1) * limit;
 
-        if (book.addedBy.toString() !== req.user.id) {
-            return res.status(403).json({ detail: 'You can only edit your own books' }); // Use 'detail' for sonner
+        let query = {};
+        if (req.query.search) {
+            query.$or = [
+                { title: { $regex: req.query.search, $options: 'i' } },
+                { author: { $regex: req.query.search, $options: 'i' } },
+            ];
+        }
+        if (req.query.genre) {
+            query.genre = req.query.genre;
         }
 
-        book = await Book.findByIdAndUpdate(
-            req.params.id, 
-            { $set: { title, author, description, genre, publishedYear: year } }, 
-            { new: true }
-        );
-        res.json(book);
+        let sortOptions = { createdAt: -1 }; // Default to 'latest'
+        if (req.query.sort_by === 'year_desc') sortOptions = { publishedYear: -1 };
+        if (req.query.sort_by === 'year_asc') sortOptions = { publishedYear: 1 };
+
+        const totalBooks = await Book.countDocuments(query);
+        const books = await Book.find(query).sort(sortOptions).skip(skip).limit(limit);
+
+        let formattedBooks = await Promise.all(books.map(book => formatBookData(book)));
+
+        // Manual sort for rating after calculation
+        if (req.query.sort_by === 'rating_desc') {
+            formattedBooks.sort((a, b) => b.average_rating - a.average_rating);
+        }
+
+        res.json({
+            books: formattedBooks,
+            total: totalBooks,
+            page,
+            per_page: limit,
+            total_pages: Math.ceil(totalBooks / limit) || 1,
+        });
     } catch (err) {
-        console.error(err.message);
+        console.error("Error in getBooks:", err.message);
         res.status(500).send('Server Error');
     }
 };
 
-// @desc    Delete a book
-// @route   DELETE /api/books/:id
+exports.getBookById = async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ msg: 'Book not found' });
+        
+        const formattedBook = await formatBookData(book);
+        res.json(formattedBook);
+    } catch (err) {
+        if (err.kind === 'ObjectId') return res.status(404).json({ msg: 'Book not found' });
+        console.error("Error in getBookById:", err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.addBook = async (req, res) => {
+    try {
+        const newBook = new Book({
+            ...req.body,
+            publishedYear: req.body.year,
+            addedBy: req.user.id,
+        });
+        await newBook.save();
+        const formattedBook = await formatBookData(newBook);
+        res.status(201).json(formattedBook);
+    } catch (err) {
+        console.error("Error in addBook:", err.message);
+        res.status(500).json({ msg: 'Server Error' });
+    }
+};
+
+exports.updateBook = async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ detail: 'Book not found' });
+        if (book.addedBy.toString() !== req.user.id) {
+            return res.status(403).json({ detail: 'You can only edit your own books' });
+        }
+        const updatedBook = await Book.findByIdAndUpdate(
+            req.params.id,
+            { ...req.body, publishedYear: req.body.year },
+            { new: true }
+        );
+        const formattedBook = await formatBookData(updatedBook);
+        res.json(formattedBook);
+    } catch (err) {
+        console.error("Error in updateBook:", err.message);
+        res.status(500).json({ detail: 'Server Error' });
+    }
+};
+
 exports.deleteBook = async (req, res) => {
     try {
-        let book = await Book.findById(req.params.id);
-        if (!book) return res.status(404).json({ msg: 'Book not found' });
-
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ detail: 'Book not found' });
         if (book.addedBy.toString() !== req.user.id) {
             return res.status(403).json({ detail: 'You can only delete your own books' });
         }
-
-        await Book.findByIdAndDelete(req.params.id);
-        // Delete associated reviews
         await Review.deleteMany({ bookId: req.params.id });
-        
+        await Book.findByIdAndDelete(req.params.id);
         res.json({ message: 'Book deleted successfully' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error("Error in deleteBook:", err.message);
+        res.status(500).json({ detail: 'Server Error' });
     }
 };
 
-// @desc    Get all unique genres
-// @route   GET /api/genres
 exports.getGenres = async (req, res) => {
     try {
         const genres = await Book.distinct('genre');
-        res.json({ genres: genres.sort() });
+        res.json({ genres: genres.filter(g => g).sort() });
     } catch (err) {
-        console.error(err.message);
+        console.error("Error in getGenres:", err.message);
         res.status(500).send('Server Error');
     }
 };
